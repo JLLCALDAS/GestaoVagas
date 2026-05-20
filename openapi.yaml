@@ -1,0 +1,308 @@
+openapi: 3.0.3
+info:
+  title: Gestao Vagas API
+  version: 1.0.0
+  description: |
+    Especificacao OpenAPI da API Gestao Vagas.
+
+    Observacoes:
+    - Endpoints de cadastro e autenticacao sao publicos.
+    - Endpoints de perfil/vagas exigem Authorization Bearer token.
+    - Existem dois contextos de token (company e candidate), ambos em JWT.
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Company
+  - name: Candidate
+  - name: Job
+
+paths:
+  /company/:
+    post:
+      tags: [Company]
+      summary: Cadastrar empresa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyCreateRequest'
+            example:
+              username: empresa01
+              email: contato@empresa.com
+              password: "123456"
+              website: https://empresa.com
+              name: Empresa X
+              description: Empresa de tecnologia
+      responses:
+        '200':
+          description: Empresa cadastrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyResponse'
+        '400':
+          description: Erro de validacao ou negocio
+
+  /company/auth:
+    post:
+      tags: [Company]
+      summary: Autenticar empresa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthCompanyRequest'
+            example:
+              username: empresa01
+              password: "123456"
+      responses:
+        '200':
+          description: Token JWT da empresa
+          content:
+            application/json:
+              schema:
+                type: string
+              example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnZXN0YW8tdmFnYXMiLCJzdWIiOiIuLi4ifQ.signature
+        '401':
+          description: Credenciais invalidas
+
+  /candidate/:
+    post:
+      tags: [Candidate]
+      summary: Cadastrar candidato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateCreateRequest'
+            example:
+              name: Joao Silva
+              username: joaosilva
+              email: joao@email.com
+              password: "123456"
+              description: Desenvolvedor Java
+              curriculum: Spring Boot, PostgreSQL
+      responses:
+        '200':
+          description: Candidato cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateResponse'
+        '400':
+          description: Erro de validacao ou negocio
+
+    get:
+      tags: [Candidate]
+      summary: Buscar perfil do candidato autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil do candidato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateProfileResponse'
+        '400':
+          description: Erro de negocio
+        '401':
+          description: Token ausente/invalido
+
+  /candidate/auth:
+    post:
+      tags: [Candidate]
+      summary: Autenticar candidato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthCandidateRequest'
+            example:
+              username: joaosilva
+              password: "123456"
+      responses:
+        '200':
+          description: Token JWT do candidato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthCandidateResponse'
+        '401':
+          description: Credenciais invalidas
+
+  /job/:
+    post:
+      tags: [Job]
+      summary: Criar vaga (empresa autenticada)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobRequest'
+            example:
+              description: Vaga Java Spring
+              benefits: VR, Plano de Saude
+              level: Pleno
+      responses:
+        '200':
+          description: Vaga criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobResponse'
+        '401':
+          description: Token ausente/invalido
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthCompanyRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthCandidateRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthCandidateResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+          format: int64
+
+    CompanyCreateRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+          maxLength: 50
+        website:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    CompanyResponse:
+      allOf:
+        - $ref: '#/components/schemas/CompanyCreateRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+
+    CandidateCreateRequest:
+      type: object
+      required: [name, username, email, password]
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+          maxLength: 50
+        description:
+          type: string
+        curriculum:
+          type: string
+
+    CandidateResponse:
+      allOf:
+        - $ref: '#/components/schemas/CandidateCreateRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+
+    CandidateProfileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        description:
+          type: string
+
+    CreateJobRequest:
+      type: object
+      required: [description, benefits, level]
+      properties:
+        description:
+          type: string
+        benefits:
+          type: string
+        level:
+          type: string
+
+    JobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        benefits:
+          type: string
+        level:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

@@ -1,0 +1,397 @@
+{
+	"info": {
+		"_postman_id": "gestao-vagas-api-collection",
+		"name": "Gestao Vagas API",
+		"description": "Collection para testar a API de Gestão de Vagas - endpoints de Company, Candidate, Autenticação e Vagas.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "company_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "candidate_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "job_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Company",
+			"item": [
+				{
+					"name": "Criar Company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('company_id', jsonData.id);",
+									"    pm.test('Company criada com sucesso', function () {",
+									"        pm.expect(jsonData.id).to.not.be.undefined;",
+									"        pm.expect(jsonData.username).to.eql('empresa_teste');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"empresa_teste\",\n    \"email\": \"empresa@teste.com\",\n    \"password\": \"123456\",\n    \"name\": \"Empresa Teste LTDA\",\n    \"website\": \"https://empresateste.com.br\",\n    \"description\": \"Empresa de tecnologia focada em soluções inovadoras\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/company/",
+							"host": ["{{base_url}}"],
+							"path": ["company", ""]
+						},
+						"description": "Cria uma nova empresa. Endpoint público (não requer autenticação)."
+					},
+					"response": []
+				},
+				{
+					"name": "Autenticar Company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('company_token', jsonData.access_token);",
+									"    pm.test('Token da company obtido com sucesso', function () {",
+									"        pm.expect(jsonData.access_token).to.not.be.undefined;",
+									"        pm.expect(jsonData.expires_in).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"empresa_teste\",\n    \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/company/auth/",
+							"host": ["{{base_url}}"],
+							"path": ["company", "auth", ""]
+						},
+						"description": "Autentica a empresa e retorna um JWT token. Endpoint público."
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Vaga (Job)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('job_id', jsonData.id);",
+									"    pm.test('Vaga criada com sucesso', function () {",
+									"        pm.expect(jsonData.id).to.not.be.undefined;",
+									"        pm.expect(jsonData.description).to.eql('Vaga para desenvolvedor Java Pleno');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{company_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Vaga para desenvolvedor Java Pleno\",\n    \"benefits\": \"Vale Alimentação, Vale Refeição, Vale Transporte, Plano de Saúde\",\n    \"level\": \"Pleno\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/company/job/",
+							"host": ["{{base_url}}"],
+							"path": ["company", "job", ""]
+						},
+						"description": "Cria uma nova vaga. Requer autenticação com token de COMPANY."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados à empresa: criação, autenticação e gerenciamento de vagas."
+		},
+		{
+			"name": "Candidate",
+			"item": [
+				{
+					"name": "Criar Candidato",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('candidate_id', jsonData.id);",
+									"    pm.test('Candidato criado com sucesso', function () {",
+									"        pm.expect(jsonData.id).to.not.be.undefined;",
+									"        pm.expect(jsonData.username).to.eql('joao_silva');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"João da Silva\",\n    \"username\": \"joao_silva\",\n    \"email\": \"joao.silva@example.com\",\n    \"password\": \"senha123\",\n    \"description\": \"Desenvolvedor Java com 3 anos de experiência\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/candidate/",
+							"host": ["{{base_url}}"],
+							"path": ["candidate", ""]
+						},
+						"description": "Cria um novo candidato. Endpoint público (não requer autenticação)."
+					},
+					"response": []
+				},
+				{
+					"name": "Autenticar Candidato",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('candidate_token', jsonData.access_token);",
+									"    pm.test('Token do candidato obtido com sucesso', function () {",
+									"        pm.expect(jsonData.access_token).to.not.be.undefined;",
+									"        pm.expect(jsonData.expires_in).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"joao_silva\",\n    \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/candidate/auth/",
+							"host": ["{{base_url}}"],
+							"path": ["candidate", "auth", ""]
+						},
+						"description": "Autentica o candidato e retorna um JWT token. Endpoint público. OBS: Token expira em 2 minutos!"
+					},
+					"response": []
+				},
+				{
+					"name": "Perfil do Candidato",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.test('Perfil retornado com sucesso', function () {",
+									"        pm.expect(jsonData.name).to.not.be.undefined;",
+									"        pm.expect(jsonData.username).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{candidate_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/candidate/",
+							"host": ["{{base_url}}"],
+							"path": ["candidate", ""]
+						},
+						"description": "Retorna o perfil do candidato autenticado. Requer token de CANDIDATE."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Vagas por Filtro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.test('Lista de vagas retornada', function () {",
+									"        pm.expect(jsonData).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{candidate_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/candidate/job?filter=Java",
+							"host": ["{{base_url}}"],
+							"path": ["candidate", "job"],
+							"query": [
+								{
+									"key": "filter",
+									"value": "Java"
+								}
+							]
+						},
+						"description": "Lista vagas filtradas pela descrição. Requer token de CANDIDATE."
+					},
+					"response": []
+				},
+				{
+					"name": "Aplicar para Vaga",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.test('Inscrição realizada com sucesso', function () {",
+									"        pm.expect(jsonData.id).to.not.be.undefined;",
+									"        pm.expect(jsonData.candidateId).to.not.be.undefined;",
+									"        pm.expect(jsonData.jobId).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{candidate_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"{{job_id}}\""
+						},
+						"url": {
+							"raw": "{{base_url}}/candidate/job/apply",
+							"host": ["{{base_url}}"],
+							"path": ["candidate", "job", "apply"]
+						},
+						"description": "Inscreve o candidato em uma vaga. Requer token de CANDIDATE. Use o job_id retornado ao criar uma vaga."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados ao candidato: criação, autenticação, perfil, busca de vagas e inscrição."
+		}
+	]
+}
