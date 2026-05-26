@@ -3,10 +3,8 @@ package br.com.jllcaldas.gestao_vagas.modules.candidates.userCases;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import br.com.jllcaldas.gestao_vagas.exceptions.UserFoundException;
 import br.com.jllcaldas.gestao_vagas.exceptions.UserNotFoundException;
 import br.com.jllcaldas.gestao_vagas.modules.candidates.CandidateRepository;
 import br.com.jllcaldas.gestao_vagas.modules.candidates.dto.ProfileCandidateResponseDTO;
