@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>25</java.version>
+		<java.version>21</java.version>
 		<sonar.organization>jllcaldas</sonar.organization>
 		<sonar.projectKey>jllcaldas_gestao-vagas</sonar.projectKey>
 		<sonar.projectName>Gestao Vagas</sonar.projectName>

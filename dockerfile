@@ -1,15 +1,16 @@
-FROM ubuntu:22.04 AS build
+FROM eclipse-temurin:21-jdk AS build
 
-RUN apt-get update
-RUN apt-get install -y openjdk-17-jdk
+WORKDIR /app
 COPY . .
 
-RUN apt-get install -y maven
-RUN mvn clean install
+RUN chmod +x mvnw
+RUN ./mvnw clean install -DskipTests
 
-FROM openjdk:17-jdk-slim AS runtime
+FROM eclipse-temurin:21-jre AS runtime
+
+WORKDIR /app
 EXPOSE 8080
 
-COPY --from=build /target/gestao-vagas-0.0.1-SNAPSHOT.jar /app/gestao-vagas-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/target/gestao-vagas-0.0.1-SNAPSHOT.jar ./gestao-vagas.jar
 
-ENTRYPOINT ["java", "-jar", "/app/gestao-vagas-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "gestao-vagas.jar"]
